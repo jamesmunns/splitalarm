@@ -76,7 +76,7 @@ ${COMPILER}:
 # Rules for building the Quickstart RGB.
 #
 #${COMPILER}/splitalarm.axf: ${COMPILER}/buttons.o
-#${COMPILER}/splitalarm.axf: ${COMPILER}/cmdline.o
+${COMPILER}/splitalarm.axf: ${COMPILER}/cmdline.o
 ${COMPILER}/splitalarm.axf: ${COMPILER}/main.o
 ${COMPILER}/splitalarm.axf: ${COMPILER}/cmd.o
 ${COMPILER}/splitalarm.axf: ${COMPILER}/lcd44780_LP.o

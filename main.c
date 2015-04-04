@@ -40,8 +40,6 @@ int main(void)
 
     main_components_init();
 
-    cmd_printf("Entering periodic\n");
-
     //LCDWriteText("A",0,0);
 
     for(;;)
@@ -99,7 +97,7 @@ void main_components_init()
 void main_periodic()
 {
     //if new_millisecond
-        //cmd_periodic();
+        cmd_periodic();
         //btn_periodic();
         //shift_periodic();
         //disp_periodic();
@@ -107,6 +105,7 @@ void main_periodic()
     if(msec_toggle)
     {
         //Do stuff
+        //cmd_periodic();
 
         //Reset
         msec_toggle = false;
@@ -118,9 +117,9 @@ void main_periodic()
         clock_second_tick();
         //cmd_printf("TICK!\n");
 
-        clock_string_get( CUR_TIME_PTR,
-                          main_time_str );
-        cmd_printf("%s\n", main_time_str );
+        //clock_string_get( CUR_TIME_PTR,
+        //                  main_time_str );
+        //cmd_printf("%s\n", main_time_str );
 
         //Reset
         sec_toggle = false;

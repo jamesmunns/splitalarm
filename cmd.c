@@ -15,14 +15,17 @@
 
 #include "cmd.h"
 
+int cmd_help(int argc, char **argv);
+
 //Use the command library
 tCmdLineEntry g_sCmdTable[] =
 {
     {"help",     cmd_help,      " : Display list of commands" },
-    { 0, 0, 0 }
 };
 
 const int NUM_CMD = sizeof(g_sCmdTable)/sizeof(tCmdLineEntry);
+
+static char input_buffer[128];
 
 void cmd_init(void)
 {
@@ -36,9 +39,10 @@ void cmd_init(void)
     UARTStdioInit(0);
 
     cmd_printf("\nSplitAlarm - UART Loaded\n");
+    cmd_printf("> ");
 }
 
-int CMD_help(int argc, char **argv)
+int cmd_help(int argc, char **argv)
 {
     int index;
 
@@ -48,11 +52,40 @@ int CMD_help(int argc, char **argv)
     UARTprintf("\n");
     for (index = 0; index < NUM_CMD; index++)
     {
-      UARTprintf("%17s %s\n\n",
+      UARTprintf("%17s %s\n",
         g_sCmdTable[index].pcCmd,
         g_sCmdTable[index].pcHelp);
     }
     UARTprintf("\n");
 
     return (0);
+}
+
+void cmd_periodic(void)
+{
+    long cmd_status;
+
+    if(UARTPeek('\r') == -1)
+    {
+        return;
+    }
+
+    // Get the buffer
+    UARTgets(input_buffer, sizeof(input_buffer));
+
+    cmd_status = CmdLineProcess(input_buffer);
+
+    switch(cmd_status)
+    {
+        case CMDLINE_BAD_CMD:
+            UARTprintf("Bad command!\n");
+            break;
+        case CMDLINE_TOO_MANY_ARGS:
+            UARTprintf("Bad arguments!\n");
+            break;
+        default:
+            break;
+    }
+
+    UARTprintf("> ");
 }
