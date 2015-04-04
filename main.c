@@ -96,16 +96,18 @@ void main_components_init()
 
 void main_periodic()
 {
-    //if new_millisecond
-        cmd_periodic();
+    // Every cycle
+    cmd_periodic_cont();
+
         //btn_periodic();
         //shift_periodic();
         //disp_periodic();
         //xbee_periodic();
+
     if(msec_toggle)
     {
         //Do stuff
-        //cmd_periodic();
+        //cmd_periodic_cont();
 
         //Reset
         msec_toggle = false;
@@ -114,7 +116,7 @@ void main_periodic()
     if(sec_toggle)
     {
         //Ping
-        clock_second_tick();
+        clock_periodic_second();
         //cmd_printf("TICK!\n");
 
         //clock_string_get( CUR_TIME_PTR,

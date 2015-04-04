@@ -35,10 +35,12 @@ typedef enum
 
 
 void clock_init(void);
-void clock_second_tick(void);
+void clock_periodic_second(void);
 void clock_cur_time_get(basic_time_t* cur_time);
 void clock_string_get( basic_time_t*   gtime,
                        char*           time_str );
+void clock_new_time_set(basic_time_t* ntime);
+void clock_debug_toggle(unsigned char tog);
 
 
 #endif

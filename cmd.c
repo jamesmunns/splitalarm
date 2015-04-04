@@ -12,18 +12,27 @@
 #include "driverlib/hibernate.h"
 #include "utils/uartstdio.h"
 #include "utils/cmdline.h"
+#include "utils/ustdlib.h"
 
 #include "cmd.h"
+#include "clock.h"
 
 int cmd_help(int argc, char **argv);
+int cmd_time_set(int argc, char **argv);
+int cmd_time_show(int argc, char **argv);
+int cmd_time_debug(int argc, char **argv);
 
 //Use the command library
 tCmdLineEntry g_sCmdTable[] =
 {
-    {"help",     cmd_help,      " : Display list of commands" },
+    {"help",     cmd_help,       " : Display list of commands" },
+    {"timeset",  cmd_time_set,   " : Set Time 'hh mm ss dd mm yyyy'" },
+    {"timenow",  cmd_time_show,  " : Display the current time"},
+    {"timedbg",  cmd_time_debug, " : on/off - Display the time every second"},
+    {0,0,0}
 };
 
-const int NUM_CMD = sizeof(g_sCmdTable)/sizeof(tCmdLineEntry);
+const int NUM_CMD = (sizeof(g_sCmdTable)/sizeof(tCmdLineEntry)) - 1;
 
 static char input_buffer[128];
 
@@ -42,26 +51,7 @@ void cmd_init(void)
     cmd_printf("> ");
 }
 
-int cmd_help(int argc, char **argv)
-{
-    int index;
-
-    (void)argc;
-    (void)argv;
-
-    UARTprintf("\n");
-    for (index = 0; index < NUM_CMD; index++)
-    {
-      UARTprintf("%17s %s\n",
-        g_sCmdTable[index].pcCmd,
-        g_sCmdTable[index].pcHelp);
-    }
-    UARTprintf("\n");
-
-    return (0);
-}
-
-void cmd_periodic(void)
+void cmd_periodic_cont(void)
 {
     long cmd_status;
 
@@ -88,4 +78,80 @@ void cmd_periodic(void)
     }
 
     UARTprintf("> ");
+}
+
+/**********************************************************
+Command line callbacks
+**********************************************************/
+
+int cmd_help(int argc, char **argv)
+{
+    int index;
+
+    (void)argc;
+    (void)argv;
+
+    UARTprintf("\n");
+    for (index = 0; index < NUM_CMD; index++)
+    {
+      UARTprintf("%17s %s\n",
+        g_sCmdTable[index].pcCmd,
+        g_sCmdTable[index].pcHelp);
+    }
+    UARTprintf("\n");
+
+    return (0);
+}
+
+int cmd_time_set(int argc, char **argv)
+{
+    if(argc == 7)
+    {
+        basic_time_t new_time;
+        char timebuf[32];
+
+        //hh mm ss dd mm yyyy
+        new_time.hour   = (unsigned char)ustrtoul(argv[1], 0, 10);
+        new_time.minute = (unsigned char)ustrtoul(argv[2], 0, 10);
+        new_time.second = (unsigned char)ustrtoul(argv[3], 0, 10);
+        new_time.day    = (unsigned char)ustrtoul(argv[4], 0, 10);
+        new_time.month  = (unsigned char)ustrtoul(argv[5], 0, 10);
+        new_time.year   = (unsigned int )ustrtoul(argv[6], 0, 10);
+
+        clock_new_time_set(&new_time);
+
+        cmd_printf("Current Time:\n");
+        clock_string_get( CUR_TIME_PTR,
+                          timebuf );
+        cmd_printf("%s\n", timebuf);
+    }
+
+    return 0;
+}
+
+int cmd_time_show(int argc, char **argv)
+{
+    char timebuf[32];
+
+    cmd_printf("Current Time:\n");
+    clock_string_get( CUR_TIME_PTR,
+                      timebuf );
+    cmd_printf("%s\n", timebuf);
+
+    return 0;
+}
+
+int cmd_time_debug(int argc, char **argv)
+{
+    if( ( argc == 2 )
+     && ( ( !ustrcmp( argv[1], "on"  ) )
+       || ( !ustrcmp( argv[1], "off" ) ) ) )
+    {
+        unsigned char toggle;
+        toggle = !ustrcmp( argv[1], "on" );
+
+        clock_debug_toggle(toggle);
+    }
+
+    return 0;
 }

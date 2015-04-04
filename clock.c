@@ -2,8 +2,10 @@
 #include "inc/hw_types.h"
 #include "utils/ustdlib.h"
 #include <string.h>
+#include "cmd.h"
 
 static basic_time_t cur_time;
+static unsigned char clock_dbg_flag;
 static unsigned char days_per_month[MONTH_COUNT] = {
     00, //Invalid Month
     31, //Jan
@@ -28,9 +30,11 @@ void clock_init(void)
     cur_time.hour = 0;
     cur_time.minute = 0;
     cur_time.second = 0;
+
+    clock_dbg_flag = false;
 }
 
-void clock_second_tick(void)
+void clock_periodic_second(void)
 {
     //Increment, start cascade
     cur_time.second++;
@@ -68,11 +72,26 @@ void clock_second_tick(void)
         cur_time.year++;
         cur_time.month = JANUARY;
     }
+
+    //Debug
+    if(clock_dbg_flag)
+    {
+        char timebuf[32];
+
+        clock_string_get( CUR_TIME_PTR,
+                          timebuf );
+        cmd_printf("%s\n", timebuf);
+    }
 }
 
 void clock_cur_time_get(basic_time_t* gtime)
 {
     memcpy(&gtime, &cur_time, sizeof(cur_time));
+}
+
+void clock_debug_toggle(unsigned char tog)
+{
+    clock_dbg_flag = tog;
 }
 
 //hh:mm:ss dd.mm.yyyy //19
@@ -97,4 +116,26 @@ void clock_string_get( basic_time_t*   gtime,
               gtime->day,
               gtime->month,
               gtime->year );
+}
+
+void clock_new_time_set(basic_time_t* ntime)
+{
+    if(ntime==NULL)
+    {
+        return;
+    }
+
+    if( ( ntime->second >=          60                  )
+     || ( ntime->minute >=          60                  )
+     || ( ntime->hour   >=          24                  )
+     || ( ntime->month  >= MONTH_COUNT                  ) // Check month before day
+     || ( ntime->day    >  days_per_month[ntime->month] )
+     || ( ntime->year   < 2000                          )
+     || ( ntime->year   > 2100                          ) )
+    {
+        //Data failed check. Dont take new data.
+        return;
+    }
+
+    memcpy( &cur_time, ntime, sizeof(cur_time) );
 }
