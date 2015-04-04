@@ -27,8 +27,6 @@ volatile bool sec_toggle;
 volatile bool msec_toggle;
 volatile unsigned int detick;
 
-static char main_time_str[32];
-
 void main_system_init();
 void main_components_init();
 void main_periodic();
@@ -117,11 +115,6 @@ void main_periodic()
     {
         //Ping
         clock_periodic_second();
-        //cmd_printf("TICK!\n");
-
-        //clock_string_get( CUR_TIME_PTR,
-        //                  main_time_str );
-        //cmd_printf("%s\n", main_time_str );
 
         //Reset
         sec_toggle = false;

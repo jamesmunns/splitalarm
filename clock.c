@@ -24,12 +24,19 @@ static unsigned char days_per_month[MONTH_COUNT] = {
 
 void clock_init(void)
 {
-    cur_time.year = 2015;
-    cur_time.month = 1;
-    cur_time.day = 1;
-    cur_time.hour = 0;
-    cur_time.minute = 0;
-    cur_time.second = 0;
+    //if(!sleep_time_get())
+    {
+        cur_time.year = 2015;
+        cur_time.month = 1;
+        cur_time.day = 1;
+        cur_time.hour = 0;
+        cur_time.minute = 0;
+        cur_time.second = 0;
+    }
+    //else
+    {
+
+    }
 
     clock_dbg_flag = false;
 }
@@ -120,22 +127,32 @@ void clock_string_get( basic_time_t*   gtime,
 
 void clock_new_time_set(basic_time_t* ntime)
 {
-    if(ntime==NULL)
+    if(!clock_time_validate(ntime))
     {
-        return;
-    }
-
-    if( ( ntime->second >=          60                  )
-     || ( ntime->minute >=          60                  )
-     || ( ntime->hour   >=          24                  )
-     || ( ntime->month  >= MONTH_COUNT                  ) // Check month before day
-     || ( ntime->day    >  days_per_month[ntime->month] )
-     || ( ntime->year   < 2000                          )
-     || ( ntime->year   > 2100                          ) )
-    {
-        //Data failed check. Dont take new data.
         return;
     }
 
     memcpy( &cur_time, ntime, sizeof(cur_time) );
+}
+
+unsigned char clock_time_validate(basic_time_t* timecheck)
+{
+    if(timecheck==NULL)
+    {
+        return false;
+    }
+
+    if( ( timecheck->second >=          60                  )
+     || ( timecheck->minute >=          60                  )
+     || ( timecheck->hour   >=          24                  )
+     || ( timecheck->month  >= MONTH_COUNT                  ) // Check month before day
+     || ( timecheck->day    >  days_per_month[timecheck->month] )
+     || ( timecheck->year   < 2000                          )
+     || ( timecheck->year   > 2100                          ) )
+    {
+        //Data failed check. Dont take new data.
+        return false;
+    }
+
+    return true;
 }
