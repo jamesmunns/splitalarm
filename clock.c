@@ -3,6 +3,7 @@
 #include "utils/ustdlib.h"
 #include <string.h>
 #include "cmd.h"
+#include "xbee.h"
 
 static basic_time_t cur_time;
 static unsigned char clock_dbg_flag;
@@ -87,7 +88,17 @@ void clock_periodic_second(void)
 
         clock_string_get( CUR_TIME_PTR,
                           timebuf );
-        cmd_printf("%s\n", timebuf);
+        cmd_printf("%s ", timebuf);
+        if(xbee_is_connected())
+        {
+            cmd_printf("xbee: good");
+        }
+        else
+        {
+            cmd_printf("xbee: not connected");
+        }
+
+        cmd_printf("\n");
     }
 }
 

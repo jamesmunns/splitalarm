@@ -19,12 +19,14 @@
 #include "cmd.h"
 #include "clock.h"
 #include "alarm.h"
+#include "xbee.h"
 
 #include "lcd44780_LP.h"
 
 volatile bool sec_toggle;
 volatile bool msec_toggle;
 volatile unsigned int detick;
+volatile uint32_t cur_ms_tick;
 
 void main_system_init();
 void main_components_init();
@@ -69,7 +71,9 @@ void main_system_init()
     sec_toggle  = false;
     msec_toggle = false;
     detick      = 0;
+    cur_ms_tick = 0;
 
+    // Enable the real time clock peripheral
     SysTickPeriodSet(SysCtlClockGet() / MAIN_SYSTICKS_PER_SEC);
     SysTickEnable();
     SysTickIntEnable();
@@ -79,19 +83,29 @@ void main_system_init()
 void main_components_init()
 {
     // Call all the other _init() functions here
+
     // Initialize cmd first to get printing
+    // Uses PortA pins 0,1
     cmd_init();
 
     // All other inits. May be order dependant
+
+    // Initialize the clock tracking
     clock_init();
+
+    // Initialize the alarm tracking
     alarm_init();
+
+    // Initialize the XBee radio
+    // Uses PortC pins 4,5
+    xbee_init();
     //led_init();
     //btn_init();
     //shift_init();
     //disp_init();
-    //xbee_init();
 
     //temp
+    // Uses PortB pins 0,1,4,5,6,7
     //initLCD();
 }
 
@@ -99,16 +113,17 @@ void main_periodic()
 {
     // Every cycle
     cmd_periodic_cont();
+    xbee_periodic_cont();
 
-        //btn_periodic();
-        //shift_periodic();
-        //disp_periodic();
-        //xbee_periodic();
+    // TODO
+    //btn_periodic();
+    //shift_periodic();
+    //disp_periodic();
 
     if(msec_toggle)
     {
         //Do stuff
-        //cmd_periodic_cont();
+        cur_ms_tick++;
 
         //Reset
         msec_toggle = false;
@@ -119,6 +134,7 @@ void main_periodic()
         //Ping
         clock_periodic_second();
         alarm_periodic_second();
+
 
         //Reset
         sec_toggle = false;
@@ -137,4 +153,9 @@ void SysTickIntHandler(void)
 
     detick--;
 
+}
+
+uint32_t main_ms_tick_get(void)
+{
+    return cur_ms_tick;
 }
