@@ -10,7 +10,6 @@
 #include "driverlib/systick.h"
 #include "driverlib/interrupt.h"
 #include "driverlib/hibernate.h"
-#include "utils/uartstdio.h"
 #include "utils/cmdline.h"
 #include "utils/ustdlib.h"
 

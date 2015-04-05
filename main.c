@@ -18,10 +18,9 @@
 #include "main.h"
 #include "cmd.h"
 #include "clock.h"
+#include "alarm.h"
 
 #include "lcd44780_LP.h"
-
-typedef unsigned char bool;
 
 volatile bool sec_toggle;
 volatile bool msec_toggle;
@@ -67,7 +66,7 @@ void main_system_init()
     ROM_SysCtlClockSet(SYSCTL_SYSDIV_5 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ |
                        SYSCTL_OSC_MAIN);
 
-    sec_toggle = false;
+    sec_toggle  = false;
     msec_toggle = false;
     detick      = 0;
 
@@ -80,8 +79,12 @@ void main_system_init()
 void main_components_init()
 {
     // Call all the other _init() functions here
+    // Initialize cmd first to get printing
     cmd_init();
+
+    // All other inits. May be order dependant
     clock_init();
+    alarm_init();
     //led_init();
     //btn_init();
     //shift_init();
@@ -115,6 +118,7 @@ void main_periodic()
     {
         //Ping
         clock_periodic_second();
+        alarm_periodic_second();
 
         //Reset
         sec_toggle = false;

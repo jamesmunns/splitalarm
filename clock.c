@@ -93,10 +93,10 @@ void clock_periodic_second(void)
 
 void clock_cur_time_get(basic_time_t* gtime)
 {
-    memcpy(&gtime, &cur_time, sizeof(cur_time));
+    memcpy(gtime, &cur_time, sizeof(cur_time));
 }
 
-void clock_debug_toggle(unsigned char tog)
+void clock_debug_toggle(bool tog)
 {
     clock_dbg_flag = tog;
 }
@@ -135,7 +135,7 @@ void clock_new_time_set(basic_time_t* ntime)
     memcpy( &cur_time, ntime, sizeof(cur_time) );
 }
 
-unsigned char clock_time_validate(basic_time_t* timecheck)
+bool clock_time_validate(basic_time_t* timecheck)
 {
     if(timecheck==NULL)
     {
@@ -155,4 +155,17 @@ unsigned char clock_time_validate(basic_time_t* timecheck)
     }
 
     return true;
+}
+
+// Adapted from Tomohiko Sakamoto's method
+day_t clock_day_of_week_get( unsigned int  y,
+                             unsigned char m,
+                             unsigned char d )      /* 1 <= m <= 12,  y > 1752 (in the U.K.) */
+{
+    static int t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+    if(m < 3)
+    {
+        y--;
+    }
+    return 1 << ( ( (y + y/4 - y/100 + y/400 + t[m-1] + d) % 7 ) - 1 );
 }
