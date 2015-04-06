@@ -25,6 +25,8 @@ int cmd_load_eeprom(int argc, char **argv);
 int cmd_save_eeprom(int argc, char **argv);
 int cmd_alarm_get(int argc, char **argv);
 int cmd_alarm_set(int argc, char **argv);
+int cmd_alarm_clear(int argc, char **argv);
+int cmd_alarm_fire(int argc, char **argv);
 
 //Use the command library
 tCmdLineEntry g_sCmdTable[] =
@@ -37,6 +39,8 @@ tCmdLineEntry g_sCmdTable[] =
     {"setalm",   cmd_alarm_set,   " : Set Alarm 'N hh mm ddddddd e', sun-sat"},
     {"eload",    cmd_load_eeprom, " : load data from the eeprom"},
     {"esave",    cmd_save_eeprom, " : save data to the eeprom"},
+    {"noalm",    cmd_alarm_clear, " : stop any current alarms"},
+    {"goalm",    cmd_alarm_fire,  " : fire an alarm"},
     {0,0,0}
 };
 
@@ -243,5 +247,19 @@ int cmd_alarm_set(int argc, char **argv)
         }
     }
 
+    return 0;
+}
+
+int cmd_alarm_clear(int argc, char **argv)
+{
+    cmd_printf("Alarms cleared!\n");
+    alarm_acknowledge();
+    return 0;
+}
+
+int cmd_alarm_fire(int argc, char **argv)
+{
+    cmd_printf("Simulating Alarm!\n");
+    alarm_handle_alarm();
     return 0;
 }
