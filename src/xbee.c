@@ -7,6 +7,7 @@
 #include "xbee.h"
 #include "main.h"
 #include "alarm.h"
+#include "alert_rgb.h"
 
 #define XBEE_UART_PERIPH SYSCTL_PERIPH_UART1
 #define XBEE_UART_BASE   UART1_BASE
@@ -66,11 +67,6 @@ void xbee_periodic_cont(void)
 //    bool has_announced = false;
     while(ROM_UARTCharsAvail(XBEE_UART_BASE))
     {
-//        if(!has_announced)
-//        {
-//            cmd_printf("xbee: @");
-//            has_announced = true;
-//        }
         //We can block because there is a char available
         utemp = ROM_UARTCharGet(XBEE_UART_BASE);
         if(utemp&0xFFFFFF00)
@@ -82,11 +78,12 @@ void xbee_periodic_cont(void)
             xbee_depacket_machine( ( uint8_t )( utemp & 0xFF ) );
         }
     }
-//    if(has_announced)
-//    {
-//        cmd_printf("@\n");
-//    }
 
+}
+
+void xbee_periodic_second(void)
+{
+    alert_rgb_xbee_notify(xbee_is_connected());
 }
 
 void xbee_depacket_machine(uint8_t cur_byte)

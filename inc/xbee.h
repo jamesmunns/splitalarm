@@ -5,6 +5,7 @@ void xbee_init(void);
 void xbee_periodic_cont(void);
 void xbee_periodic_second(void);
 bool xbee_is_connected( void );
+void xbee_periodic_second(void);
 
 typedef enum{
     XBEE_SEEK_DELIMITER_STATE,

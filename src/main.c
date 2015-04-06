@@ -144,6 +144,7 @@ void main_periodic()
         //Ping
         clock_periodic_second();
         alarm_periodic_second();
+        xbee_periodic_second();
 
 
         //Reset
