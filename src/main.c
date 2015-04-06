@@ -21,6 +21,7 @@
 #include "alarm.h"
 #include "xbee.h"
 #include "store.h"
+#include "alert_rgb.h"
 
 #include "lcd44780_LP.h"
 
@@ -94,6 +95,9 @@ void main_components_init()
     // Make EEProm available
     store_init();
 
+    // Initialize the RGB LED on-board
+    alert_rgb_init();
+
     // Initialize the clock tracking
     clock_init();
 
@@ -128,6 +132,8 @@ void main_periodic()
     {
         //Do stuff
         cur_ms_tick++;
+
+        alert_rgb_periodic_msec();
 
         //Reset
         msec_toggle = false;

@@ -4,6 +4,7 @@
 #include <string.h>
 #include "store.h"
 #include "utils/ustdlib.h"
+#include "alert_rgb.h"
 
 static alarm_t      alarms[ALARM_CT];
 static basic_time_t lcl_time;
@@ -58,7 +59,7 @@ void alarm_periodic_second(void)
         if( alarm_check_trigger( &lcl_time, &alarms[i] ) )
         {
             fire_alarm = true;
-            cmd_printf("Alarm %d fired", i);
+            cmd_printf("Alarm %d fired\n", i);
             alarms[i].enable_flags |= ALARM_TRIGGERED;
         }
     }
@@ -166,6 +167,8 @@ void alarm_handle_alarm(void)
 {
     alarm_firing = true;
     cmd_printf("ALARM!\n");
+
+    alert_rgb_alarm(true);
 }
 
 void alarm_acknowledge(void)
@@ -173,6 +176,7 @@ void alarm_acknowledge(void)
     if(alarm_firing)
     {
         cmd_printf("Alarm Acknowledged!\n");
+        alert_rgb_alarm(false);
     }
     alarm_firing = false;
 }
