@@ -85,6 +85,7 @@ ${COMPILER}/splitalarm.axf: ${COMPILER}/lcd44780_LP.o
 ${COMPILER}/splitalarm.axf: ${COMPILER}/clock.o
 ${COMPILER}/splitalarm.axf: ${COMPILER}/alarm.o
 ${COMPILER}/splitalarm.axf: ${COMPILER}/xbee.o
+${COMPILER}/splitalarm.axf: ${COMPILER}/store.o
 #${COMPILER}/splitalarm.axf: ${COMPILER}/rgb.o
 #${COMPILER}/splitalarm.axf: ${COMPILER}/rgb_commands.o
 ${COMPILER}/splitalarm.axf: ${COMPILER}/startup_${COMPILER}.o
