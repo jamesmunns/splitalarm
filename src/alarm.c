@@ -2,24 +2,27 @@
 #include "alarm.h"
 #include "cmd.h"
 #include <string.h>
+#include "store.h"
+#include "utils/ustdlib.h"
 
 static alarm_t      alarms[ALARM_CT];
 static basic_time_t lcl_time;
 static bool         alarm_firing;
 
-#define ALARM_DEBUG ( 1 )
+#define ALARM_DEBUG ( 0 )
 
 void alarm_init(void)
 {
-    //if(alarm_load())
+    store_data_t eeprom;
+
+    for(int i=0; i<ALARM_CT; i++)
     {
+        alarms[i].enable_flags &= ( ~ALARM_ENABLE );
     }
-    //else
+
+    if( store_data_get(&eeprom) )
     {
-        for(int i=0; i<ALARM_CT; i++)
-        {
-            alarms[i].enable_flags &= ( ~ALARM_ENABLE );
-        }
+        alarm_set( ALARM_CT, (alarm_t*)&eeprom.stored_alarms );
     }
 
     #if ALARM_DEBUG
@@ -55,6 +58,7 @@ void alarm_periodic_second(void)
         if( alarm_check_trigger( &lcl_time, &alarms[i] ) )
         {
             fire_alarm = true;
+            cmd_printf("Alarm %d fired", i);
             alarms[i].enable_flags |= ALARM_TRIGGERED;
         }
     }
@@ -85,9 +89,9 @@ bool alarm_check_trigger( basic_time_t* cur_time,
                                      cur_time->day );
 
     // Do we have a match?
-    if( ( cur_day & alarm->day_of_week      )
-     && ( cur_time->hour   >= alarm->hour   )
-     && ( cur_time->minute >= alarm->minute ) )
+    if( ( cur_day & alarm->day_of_week     )
+     && ( cur_time->hour   == alarm->hour   )
+     && ( cur_time->minute == alarm->minute ) )
     {
         return true;
     }
@@ -171,4 +175,25 @@ void alarm_acknowledge(void)
         cmd_printf("Alarm Acknowledged!\n");
     }
     alarm_firing = false;
+}
+
+//              SMTWTFS
+//ALARM_N hh:mm 1111100 [on/off]\n
+void alarm_string_get( char* alarm_str )
+{
+    char* t_ptr = alarm_str;
+
+    for(int i=0; i<ALARM_CT; i++)
+    {
+        usprintf( t_ptr,
+                 //1234567   890  123  456  78 9
+                  "ALARM_%01d %02d:%02d %02X %01d\n",
+                  i,
+                  alarms[i].hour,
+                  alarms[i].minute,
+                  alarms[i].day_of_week,
+                  (alarms[i].enable_flags & ALARM_ENABLE) ? 1 : 0 );
+
+        t_ptr+=19;
+    }
 }

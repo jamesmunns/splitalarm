@@ -30,5 +30,6 @@ void alarm_set(alarm_id_t id, alarm_t* alarm);
 void alarm_get(alarm_id_t id, alarm_t* alarm);
 bool alarm_validate(alarm_t* alarm);
 void alarm_acknowledge(void);
+void alarm_string_get( char* alarm_str );
 
 #endif

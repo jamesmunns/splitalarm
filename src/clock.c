@@ -4,6 +4,7 @@
 #include <string.h>
 #include "cmd.h"
 #include "xbee.h"
+#include "store.h"
 
 static basic_time_t cur_time;
 static unsigned char clock_dbg_flag;
@@ -25,18 +26,18 @@ static unsigned char days_per_month[MONTH_COUNT] = {
 
 void clock_init(void)
 {
-    //if(!sleep_time_get())
-    {
-        cur_time.year = 2015;
-        cur_time.month = 1;
-        cur_time.day = 1;
-        cur_time.hour = 0;
-        cur_time.minute = 0;
-        cur_time.second = 0;
-    }
-    //else
-    {
+    store_data_t eeprom;
 
+    cur_time.year = 2015;
+    cur_time.month = 1;
+    cur_time.day = 1;
+    cur_time.hour = 0;
+    cur_time.minute = 0;
+    cur_time.second = 0;
+
+    if( store_data_get(&eeprom) )
+    {
+        clock_new_time_set(&eeprom.stored_time);
     }
 
     clock_dbg_flag = false;

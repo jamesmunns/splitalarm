@@ -23,6 +23,8 @@ int cmd_time_show(int argc, char **argv);
 int cmd_time_debug(int argc, char **argv);
 int cmd_load_eeprom(int argc, char **argv);
 int cmd_save_eeprom(int argc, char **argv);
+int cmd_alarm_get(int argc, char **argv);
+int cmd_alarm_set(int argc, char **argv);
 
 //Use the command library
 tCmdLineEntry g_sCmdTable[] =
@@ -31,6 +33,8 @@ tCmdLineEntry g_sCmdTable[] =
     {"timeset",  cmd_time_set,    " : Set Time 'hh mm ss dd mm yyyy'" },
     {"timenow",  cmd_time_show,   " : Display the current time"},
     {"timedbg",  cmd_time_debug,  " : on/off - Display the time every second"},
+    {"getalm",   cmd_alarm_get,   " : Display all current alarms"},
+    {"setalm",   cmd_alarm_set,   " : Set Alarm 'N hh mm ddddddd e', sun-sat"},
     {"eload",    cmd_load_eeprom, " : load data from the eeprom"},
     {"esave",    cmd_save_eeprom, " : save data to the eeprom"},
     {0,0,0}
@@ -39,6 +43,7 @@ tCmdLineEntry g_sCmdTable[] =
 const int NUM_CMD = (sizeof(g_sCmdTable)/sizeof(tCmdLineEntry)) - 1;
 
 static char input_buffer[128];
+static char output_buffer[128];
 
 static store_data_t     eeprom_data;
 
@@ -114,7 +119,6 @@ int cmd_time_set(int argc, char **argv)
     if(argc == 7)
     {
         basic_time_t new_time;
-        char timebuf[32];
 
         //hh mm ss dd mm yyyy
         new_time.hour   = (unsigned char)ustrtoul(argv[1], 0, 10);
@@ -128,8 +132,8 @@ int cmd_time_set(int argc, char **argv)
 
         cmd_printf("Current Time:\n");
         clock_string_get( CUR_TIME_PTR,
-                          timebuf );
-        cmd_printf("%s\n", timebuf);
+                          output_buffer );
+        cmd_printf("%s\n", output_buffer);
     }
 
     return 0;
@@ -137,12 +141,11 @@ int cmd_time_set(int argc, char **argv)
 
 int cmd_time_show(int argc, char **argv)
 {
-    char timebuf[32];
 
     cmd_printf("Current Time:\n");
     clock_string_get( CUR_TIME_PTR,
-                      timebuf );
-    cmd_printf("%s\n", timebuf);
+                      output_buffer );
+    cmd_printf("%s\n", output_buffer);
 
     return 0;
 }
@@ -191,5 +194,54 @@ int cmd_save_eeprom(int argc, char **argv)
     {
         cmd_printf("Failed to store data\n");
     }
+    return 0;
+}
+
+int cmd_alarm_get(int argc, char **argv)
+{
+    alarm_string_get( (char*)&output_buffer );
+    cmd_printf("Alarms:\n");
+    cmd_printf("%s", output_buffer );
+
+    return 0;
+}
+
+//'N hh mm ddddddd e'
+int cmd_alarm_set(int argc, char **argv)
+{
+    if(argc == 6)
+    {
+        alarm_t    newalarm;
+        alarm_id_t na_id;
+
+        na_id = (alarm_id_t)ustrtoul(argv[1], 0, 10);
+
+        if(na_id<=ALARM_CT)
+        {
+            day_t temp;
+
+            newalarm.hour         = (uint8_t)ustrtoul(argv[2], 0, 10);
+            newalarm.minute       = (uint8_t)ustrtoul(argv[3], 0, 10);
+            temp                  = (day_t)ustrtoul(argv[4], 0, 2);
+            newalarm.enable_flags = ( ((uint8_t)ustrtoul(argv[5], 0, 10)) == 1 ) ? ALARM_ENABLE : 0;
+
+            //bit order must be reversed - too tired for something clever
+            newalarm.day_of_week  = 0;
+            cmd_printf("%02X:",temp);
+
+            newalarm.day_of_week |= ( ( temp & 0x40 ) >> 6 );
+            newalarm.day_of_week |= ( ( temp & 0x20 ) >> 4 );
+            newalarm.day_of_week |= ( ( temp & 0x10 ) >> 2 );
+            newalarm.day_of_week |= ( ( temp & 0x08 )      );
+            newalarm.day_of_week |= ( ( temp & 0x04 ) << 2 );
+            newalarm.day_of_week |= ( ( temp & 0x02 ) << 4 );
+            newalarm.day_of_week |= ( ( temp & 0x01 ) << 6 );
+
+            cmd_printf("%02X\n",newalarm.day_of_week);
+
+            alarm_set(na_id, &newalarm);
+        }
+    }
+
     return 0;
 }
