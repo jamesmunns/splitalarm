@@ -98,14 +98,51 @@ bool alarm_check_trigger( basic_time_t* cur_time,
 
 void alarm_set(alarm_id_t id, alarm_t* alarm)
 {
-    if( ( id >= ALARM_CT         )
-     || ( !alarm_validate(alarm) ) )
+
+    if( id > ALARM_CT )
     {
         return;
     }
+    else if( id == ALARM_CT )
+    {
+        for(int i = 0; i<ALARM_CT; i++)
+        {
+            if(!alarm_validate(&alarm[i]))
+            {
+                return;
+            }
+        }
+        memcpy(alarms, alarm, sizeof(alarms));
+    }
+    else
+    {
+        if(!alarm_validate(alarm))
+        {
+            return;
+        }
+        memcpy(&alarms[id], alarm, sizeof(alarms[id]));
+    }
 
-    memcpy(&alarms[id], alarm, sizeof(alarm_t));
-    alarms[id].enable_flags = ALARM_ENABLE; // Also marks as not triggered
+    for(int i=0; i<ALARM_CT; i++)
+    {
+        alarms[i].enable_flags &= ~ALARM_TRIGGERED;
+    }
+}
+
+void alarm_get(alarm_id_t id, alarm_t* alarm)
+{
+    if( id > ALARM_CT )
+    {
+        return;
+    }
+    else if( id == ALARM_CT )
+    {
+        memcpy(alarm, alarms, sizeof(alarms));
+    }
+    else
+    {
+        memcpy(alarm, &alarms[id], sizeof(alarms[id]));
+    }
 }
 
 bool alarm_validate(alarm_t* alarm)

@@ -91,6 +91,7 @@ ${COMPILER}/splitalarm.axf: ${COMPILER}/store.o
 ${COMPILER}/splitalarm.axf: ${COMPILER}/startup_${COMPILER}.o
 ${COMPILER}/splitalarm.axf: ${COMPILER}/uartstdio.o
 ${COMPILER}/splitalarm.axf: ${COMPILER}/ustdlib.o
+${COMPILER}/splitalarm.axf: ${COMPILER}/crc.o
 ${COMPILER}/splitalarm.axf: ${ROOT}/usblib/${COMPILER}-cm4f/libusb-cm4f.a
 ${COMPILER}/splitalarm.axf: ${ROOT}/driverlib/${COMPILER}-cm4f/libdriver-cm4f.a
 ${COMPILER}/splitalarm.axf: ./src/splitalarm.ld

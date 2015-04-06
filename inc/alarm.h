@@ -27,6 +27,7 @@ bool alarm_check_trigger( basic_time_t* cur_time,
                           alarm_t*      alarm );
 void alarm_handle_alarm(void);
 void alarm_set(alarm_id_t id, alarm_t* alarm);
+void alarm_get(alarm_id_t id, alarm_t* alarm);
 bool alarm_validate(alarm_t* alarm);
 void alarm_acknowledge(void);
 

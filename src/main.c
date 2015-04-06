@@ -20,6 +20,7 @@
 #include "clock.h"
 #include "alarm.h"
 #include "xbee.h"
+#include "store.h"
 
 #include "lcd44780_LP.h"
 
@@ -89,6 +90,9 @@ void main_components_init()
     cmd_init();
 
     // All other inits. May be order dependant
+
+    // Make EEProm available
+    store_init();
 
     // Initialize the clock tracking
     clock_init();

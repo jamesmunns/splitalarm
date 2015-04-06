@@ -15,25 +15,32 @@
 
 #include "cmd.h"
 #include "clock.h"
+#include "store.h"
 
 int cmd_help(int argc, char **argv);
 int cmd_time_set(int argc, char **argv);
 int cmd_time_show(int argc, char **argv);
 int cmd_time_debug(int argc, char **argv);
+int cmd_load_eeprom(int argc, char **argv);
+int cmd_save_eeprom(int argc, char **argv);
 
 //Use the command library
 tCmdLineEntry g_sCmdTable[] =
 {
-    {"help",     cmd_help,       " : Display list of commands" },
-    {"timeset",  cmd_time_set,   " : Set Time 'hh mm ss dd mm yyyy'" },
-    {"timenow",  cmd_time_show,  " : Display the current time"},
-    {"timedbg",  cmd_time_debug, " : on/off - Display the time every second"},
+    {"help",     cmd_help,        " : Display list of commands" },
+    {"timeset",  cmd_time_set,    " : Set Time 'hh mm ss dd mm yyyy'" },
+    {"timenow",  cmd_time_show,   " : Display the current time"},
+    {"timedbg",  cmd_time_debug,  " : on/off - Display the time every second"},
+    {"eload",    cmd_load_eeprom, " : load data from the eeprom"},
+    {"esave",    cmd_save_eeprom, " : save data to the eeprom"},
     {0,0,0}
 };
 
 const int NUM_CMD = (sizeof(g_sCmdTable)/sizeof(tCmdLineEntry)) - 1;
 
 static char input_buffer[128];
+
+static store_data_t     eeprom_data;
 
 void cmd_init(void)
 {
@@ -152,5 +159,37 @@ int cmd_time_debug(int argc, char **argv)
         clock_debug_toggle(toggle);
     }
 
+    return 0;
+}
+
+int cmd_load_eeprom(int argc, char **argv)
+{
+    if(store_data_get(&eeprom_data))
+    {
+        clock_new_time_set( (basic_time_t*)&eeprom_data.stored_time);
+        alarm_set( ALARM_CT, (alarm_t*)&eeprom_data.stored_alarms );
+        cmd_printf("Loaded EEPROM data!\n");
+    }
+    else
+    {
+        cmd_printf("EEPROM Load Failed!\n");
+    }
+    return 0;
+}
+
+int cmd_save_eeprom(int argc, char **argv)
+{
+    alarm_get( ALARM_CT,
+               (alarm_t*)&eeprom_data.stored_alarms );
+    clock_cur_time_get( (basic_time_t*)&eeprom_data.stored_time);
+
+    if(store_data_write(&eeprom_data))
+    {
+        cmd_printf("Stored Data\n");
+    }
+    else
+    {
+        cmd_printf("Failed to store data\n");
+    }
     return 0;
 }

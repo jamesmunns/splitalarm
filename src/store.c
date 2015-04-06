@@ -22,11 +22,18 @@ void store_init(void)
         ret = EEPROMInit();
         if( ret == EEPROM_INIT_ERROR )
         {
+            cmd_printf("eeprom init fail\n");
             return;
         }
     }
 
+    store_eeprom_available = true;
+
     store_data_available = store_shadow_load();
+    if(store_data_available)
+    {
+        cmd_printf("eeprom load worked\n");
+    }
 
 }
 
@@ -73,6 +80,9 @@ bool store_data_write( store_data_t* data )
         return false;
     }
 
+    // Fill out the version of data to store
+    data->stored_version = STORE_CURRENT_DATA_VERSION;
+
     // Fill out the CRC of data to store
     data->stored_crc = Crc32( STORE_CRC_SEED,
                               (unsigned char*)data,
@@ -82,10 +92,12 @@ bool store_data_write( store_data_t* data )
                                   0x0,
                                   sizeof(store_data_t) );
 
-    // TODO: check the return code, disable the eeprom available if it failed
-    cmd_printf("Write said: %08X", ret );
-
-    // if ret != 0 return false, set flags false
+    if( ret != 0 )
+    {
+        store_eeprom_available = false;
+        store_data_available   = false;
+        return false;
+    }
 
     // Update the shadow register if the write was good
     memcpy(&store_shadow_data, data, sizeof(store_shadow_data) );
