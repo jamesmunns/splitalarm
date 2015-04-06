@@ -47,12 +47,14 @@ include ${ROOT}/makedefs
 #
 VPATH=../drivers
 VPATH+=../../../utils
+VPATH+=./src
 
 #
 # Where to find header files that do not live in the source directory.
 #
 IPATH=..
 IPATH+=../../..
+IPATH+=./inc
 
 #
 # The default rule, which causes the Quickstart RGB to be built.
@@ -90,8 +92,8 @@ ${COMPILER}/splitalarm.axf: ${COMPILER}/uartstdio.o
 ${COMPILER}/splitalarm.axf: ${COMPILER}/ustdlib.o
 ${COMPILER}/splitalarm.axf: ${ROOT}/usblib/${COMPILER}-cm4f/libusb-cm4f.a
 ${COMPILER}/splitalarm.axf: ${ROOT}/driverlib/${COMPILER}-cm4f/libdriver-cm4f.a
-${COMPILER}/splitalarm.axf: splitalarm.ld
-SCATTERgcc_splitalarm=splitalarm.ld
+${COMPILER}/splitalarm.axf: ./src/splitalarm.ld
+SCATTERgcc_splitalarm=./src/splitalarm.ld
 ENTRY_splitalarm=ResetISR
 CFLAGSgcc=-DTARGET_IS_BLIZZARD_RA2 -DUART_BUFFERED
 
