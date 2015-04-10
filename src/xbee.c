@@ -160,7 +160,7 @@ void xbee_depacket_machine(uint8_t cur_byte)
 
                 // Correct packet ID type
                 if( ( xbee_buffer[3]  == 0x82 )   // RX 64bit IO info
-                 && ( xbee_buffer[17] == 0x00 ) ) // We are "Active Low"
+                 && ( xbee_buffer[17] == 0x01 ) ) // We are "Active High"
                 {
                     alarm_acknowledge();
                 }
